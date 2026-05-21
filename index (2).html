@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Advanced Business Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body class="bg-slate-100 font-sans text-gray-800">
+
+    <nav class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-lg p-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-chart-line text-2xl animate-pulse"></i>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight">E-Commerce Advanced Business Dashboard</h1>
+            </div>
+            <div class="text-sm bg-white/20 px-3 py-1 rounded-full font-mono">
+                Production Mode | Live Data Analytics
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-4 md:p-6 space-y-8">
+        
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Revenue</p>
+                    <h3 id="kpi-revenue" class="text-2xl font-black text-slate-800 mt-1">Rp 0</h3>
+                    <p class="text-xs text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-arrow-up mr-1"></i>Dari nilai akhir</p>
+                </div>
+                <div class="p-4 bg-emerald-50 rounded-xl text-emerald-600">
+                    <i class="fa-solid fa-wallet text-2xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Total Orders</p>
+                    <h3 id="kpi-orders" class="text-2xl font-black text-slate-800 mt-1">0</h3>
+                    <p class="text-xs text-blue-600 font-semibold mt-1"><i class="fa-solid fa-check-double mr-1"></i>Transaksi tercatat</p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-xl text-blue-600">
+                    <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md transition">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400">Top Brand</p>
+                    <h3 id="kpi-top-brand" class="text-xl font-black text-slate-800 mt-1 truncate max-w-[160px]">-</h3>
+                    <p class="text-xs text-amber-600 font-semibold mt-1"><i class="fa-solid fa-star mr-1"></i>Volume tertinggi</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-xl text-amber-600">
+                    <i class="fa-solid fa-crown text-2xl"></i>
+                </div>
+            </div>
+
+            <div onclick="filterByReturned()" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between hover:shadow-md hover:bg-rose-50/50 transition cursor-pointer select-none group">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400 group-hover:text-rose-500 transition">Return Rate</p>
+                    <h3 id="kpi-return-rate" class="text-2xl font-black text-slate-800 mt-1">0%</h3>
+                    <p class="text-xs text-rose-600 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation mr-1 animate-bounce"></i>Klik untuk Saring 'Returned'</p>
+                </div>
+                <div class="p-4 bg-rose-50 rounded-xl text-rose-600 group-hover:bg-rose-100 transition">
+                    <i class="fa-solid fa-arrow-rotate-left text-2xl"></i>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-2xl shadow-sm border border-emerald-200 flex flex-col md:flex-row items-center gap-4">
+            <div>
+                <h2 class="font-bold text-gray-800"><i class="fa-solid fa-cloud-arrow-up text-emerald-600 mr-2"></i>Upload Dataset Manual</h2>
+                <p class="text-xs text-gray-500 mt-1">Hanya menerima file berformat .CSV. Data akan otomatis masuk ke Google Sheets.</p>
+            </div>
+            
+            <div class="flex-1 flex gap-2 w-full">
+                <input type="file" id="file-upload" accept=".csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                <button onclick="uploadDatasetKeSheet()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-full text-sm transition shrink-0">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>Kirim
+                </button>
+            </div>
+            <p id="upload-status" class="text-xs font-bold text-gray-600 md:ml-4"></p>
+        </section>
+
+        <section class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-list-check text-emerald-600 mr-2"></i>Rincian Data Transaksi</h2>
+                    <p class="text-xs text-gray-400 mt-1">Menampilkan baris data asli hasil pengolahan pipeline secara dinamis</p>
+                </div>
+                <div class="relative w-full md:w-72">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="search-input" onkeyup="filterData()" placeholder="Cari User ID, Brand, Kategori..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-gray-200">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-gray-600 text-xs font-bold uppercase border-b border-gray-200">
+                            <th class="p-4">Tanggal</th>
+                            <th class="p-4">ID Pelanggan</th>
+                            <th class="p-4">Kategori (Sub)</th>
+                            <th class="p-4">Brand</th>
+                            <th class="p-4">Metode Bayar</th>
+                            <th class="p-4">Status Pengiriman</th>
+                            <th class="p-4 text-right">Nilai Akhir (Final Price)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="text-sm divide-y divide-gray-100">
+                        <tr>
+                            <td colspan="7" class="text-center p-8 text-gray-400 font-medium">Memuat data dari API...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6">
+                <p id="table-info" class="text-xs text-gray-500">Menampilkan 0 sampai 0 dari 0 baris</p>
+                <div class="inline-flex space-x-1">
+                    <button onclick="prevPage()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-gray-600 text-xs font-bold rounded-lg transition">Sebelumnya</button>
+                    <button onclick="nextPage()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-gray-600 text-xs font-bold rounded-lg transition">Selanjutnya</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==========================================
+        // KONFIGURASI API SHEET
+        // ==========================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbxmX03CxSQhfg8nEqE4GfNTh-i_lQmdoNdGeGoIHiRmZExHFu2mUCr4NIQrK2r2MdeqgQ/exec";
+        let rawData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const rowsPerPage = 8; 
+
+        function formatRupiah(number) {
+            return "Rp " + Math.round(number).toLocaleString('id-ID');
+        }
+
+        // FUNGSI UTAMA UNTUK MENGAMBIL DATA DARI API
+        async function fetchDataFromAPI() {
+            const tbody = document.getElementById("table-body");
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error("Respon jaringan tidak berkendala");
+                
+                const data = await response.json();
+                
+                // Mapping data untuk memastikan tipe data angka
+                rawData = data.map(item => ({
+                    user_id: String(item.user_id || ''),
+                    product_id: String(item.product_id || ''),
+                    category: String(item.category || ''),
+                    subcategory: String(item.subcategory || ''),
+                    brand: String(item.brand || ''),
+                    price: parseFloat(item.price) || 0,
+                    discount: parseFloat(item.discount) || 0,
+                    final_price: parseFloat(item.final_price) || 0,
+                    rating: parseFloat(item.rating) || 0,
+                    review_count: parseInt(item.review_count) || 0,
+                    stock: parseInt(item.stock) || 0,
+                    seller_id: String(item.seller_id || ''),
+                    seller_rating: parseFloat(item.seller_rating) || 0,
+                    purchase_date: String(item.purchase_date || ''),
+                    shipping_time_days: parseInt(item.shipping_time_days) || 0,
+                    location: String(item.location || ''),
+                    device: String(item.device || ''),
+                    payment_method: String(item.payment_method || ''),
+                    is_returned: String(item.is_returned || 'False'),
+                    delivery_status: String(item.delivery_status || ''),
+                    total_penjualan: parseFloat(item.total_penjualan) || 0
+                }));
+
+                filteredData = [...rawData];
+                
+                calculateKPIs();
+                renderTable();
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-rose-500 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i>Gagal memuat data dari API. Pastikan URL benar dan akses 'Anyone' sudah aktif.</td></tr>`;
+            }
+        }
+
+        // FUNGSI MENGIRIM FILE CSV KE GOOGLE SHEETS
+        function uploadDatasetKeSheet() {
+            const fileInput = document.getElementById("file-upload");
+            const statusText = document.getElementById("upload-status");
+            
+            if (!fileInput.files.length) {
+                alert("Silakan pilih file CSV terlebih dahulu!");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            statusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-amber-500 mr-1"></i> Membaca dan mengirim file...`;
+
+            Papa.parse(file, {
+                header: true,         
+                skipEmptyLines: true, 
+                complete: async function(results) {
+                    const dataMentah = results.data;
+
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(dataMentah)
+                        });
+
+                        const balasan = await response.json();
+                        
+                        if (balasan.status === "success") {
+                            statusText.innerHTML = `<span class="text-emerald-600"><i class="fa-solid fa-check mr-1"></i> Data sukses dikirim ke Sheet!</span>`;
+                            fileInput.value = ""; 
+                            fetchDataFromAPI(); // Refresh data dashboard otomatis setelah upload berhasil
+                        } else {
+                            statusText.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-xmark mr-1"></i> Gagal: ${balasan.message}</span>`;
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                        statusText.innerHTML = `<span class="text-rose-600"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Koneksi error saat mengupload.</span>`;
+                    }
+                }
+            });
+        }
+
+        // FUNGSI MENGHITUNG MATRIKS KPI SECARA DINAMIS
+        function calculateKPIs() {
+            let totalRevenue = 0;
+            let totalOrders = filteredData.length;
+            let returnedOrders = 0;
+            let brandCounts = {};
+
+            filteredData.forEach(item => {
+                totalRevenue += item.final_price;
+                if (item.delivery_status === 'Returned' || item.is_returned === 'True') {
+                    returnedOrders++;
+                }
+                brandCounts[item.brand] = (brandCounts[item.brand] || 0) + 1;
+            });
+
+            let topBrand = "-";
+            let maxCount = 0;
+            for (let brand in brandCounts) {
+                if (brandCounts[brand] > maxCount && brand !== "") {
+                    maxCount = brandCounts[brand];
+                    topBrand = brand;
+                }
+            }
+
+            let returnRate = totalOrders > 0 ? ((returnedOrders / totalOrders) * 100).toFixed(1) : 0;
+
+            document.getElementById("kpi-revenue").innerText = formatRupiah(totalRevenue);
+            document.getElementById("kpi-orders").innerText = totalOrders.toLocaleString('id-ID');
+            document.getElementById("kpi-top-brand").innerText = topBrand;
+            document.getElementById("kpi-return-rate").innerText = returnRate + "%";
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById("table-body");
+            tbody.innerHTML = "";
+            
+            let start = (currentPage - 1) * rowsPerPage;
+            let end = start + rowsPerPage;
+            let pageItems = filteredData.slice(start, end);
+
+            if(pageItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-gray-400 font-medium">Data tidak ditemukan. Silakan ganti kata kunci pencarian.</td></tr>`;
+                document.getElementById("table-info").innerText = `Menampilkan 0 dari 0 baris`;
+                return;
+            }
+
+            pageItems.forEach(row => {
+                let badgeStyle = "bg-slate-100 text-slate-700";
+                if (row.delivery_status === 'Returned') badgeStyle = "bg-rose-100 text-rose-700 border border-rose-200";
+                else if (row.delivery_status === 'Delayed') badgeStyle = "bg-amber-100 text-amber-700 border border-amber-200";
+                else if (row.delivery_status === 'Delivered') badgeStyle = "bg-emerald-100 text-emerald-700 border border-emerald-200";
+                else if (row.delivery_status === 'In Transit') badgeStyle = "bg-blue-100 text-blue-700 border border-blue-200";
+
+                let tr = `<tr class="hover:bg-slate-50 transition duration-150">
+                    <td class="p-4 font-medium text-gray-600">${row.purchase_date}</td>
+                    <td class="p-4 font-mono font-bold text-gray-700"><i class="fa-solid fa-user text-slate-400 mr-1.5 text-xs"></i>${row.user_id}</td>
+                    <td class="p-4 text-gray-800 font-medium">${row.category} <span class="text-xs text-gray-400 font-normal">(${row.subcategory})</span></td>
+                    <td class="p-4"><span class="bg-slate-100 text-slate-800 text-xs px-2.5 py-1 rounded-md font-semibold">${row.brand}</span></td>
+                    <td class="p-4 text-gray-500 font-mono text-xs">${row.payment_method}</td>
+                    <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${badgeStyle}">${row.delivery_status}</span></td>
+                    <td class="p-4 text-right font-bold text-slate-900 font-mono">${formatRupiah(row.final_price)}</td>
+                </tr>`;
+                tbody.innerHTML += tr;
+            });
+
+            let displayEnd = Math.min(end, filteredData.length);
+            document.getElementById("table-info").innerText = `Menampilkan ${start + 1} sampai ${displayEnd} dari ${filteredData.length} baris transaksi`;
+        }
+
+        function filterData() {
+            const query = document.getElementById("search-input").value.toLowerCase();
+            filteredData = rawData.filter(item => 
+                item.user_id.toLowerCase().includes(query) || 
+                item.brand.toLowerCase().includes(query) || 
+                item.category.toLowerCase().includes(query) ||
+                item.subcategory.toLowerCase().includes(query) ||
+                item.delivery_status.toLowerCase().includes(query)
+            );
+            currentPage = 1;
+            calculateKPIs(); 
+            renderTable();
+        }
+
+        function filterByReturned() {
+            const searchInput = document.getElementById("search-input");
+            if (searchInput.value === "Returned") {
+                searchInput.value = "";
+            } else {
+                searchInput.value = "Returned";
+            }
+            filterData();
+        }
+
+        function prevPage() { 
+            if (currentPage > 1) { 
+                currentPage--; 
+                renderTable(); 
+            } 
+        }
+        
+        function nextPage() { 
+            if (currentPage * rowsPerPage < filteredData.length) { 
+                currentPage++; 
+                renderTable(); 
+            } 
+        }
+
+        window.onload = () => { 
+            fetchDataFromAPI();
+        };
+    </script>
+</body>
+</html>
